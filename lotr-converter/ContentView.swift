@@ -12,10 +12,11 @@ struct ContentView: View {
     // State tells struct to allow the variable to change
     @State var showExchangeInfo = false
     @State var showCurrencyInfo = false
-    @State var leftAmount = ""
-    @State var rightAmount = ""
+    @State var leftAmount: String = ""
+    @State var rightAmount: String = ""
     @State var leftCurrency: Currency = .silverPiece
     @State var rightCurrency: Currency = .goldPiece
+    
     var body: some View {
         ZStack {
             // background image
@@ -97,7 +98,7 @@ struct ContentView: View {
                         InfoView()
                     }
                     .sheet(isPresented: $showCurrencyInfo) {
-                        SelectCurrency(topCurrency: leftCurrency, bottomCurrency: rightCurrency)
+                        SelectCurrency(topCurrency: $leftCurrency, bottomCurrency: $rightCurrency)
                     }
                 }
                 
