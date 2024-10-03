@@ -6,16 +6,22 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct ContentView: View {
     // let is the same as const
     // State tells struct to allow the variable to change
     @State var showExchangeInfo = false
     @State var showCurrencyInfo = false
+    
     @State var leftAmount: String = ""
     @State var rightAmount: String = ""
+    
     @State var leftCurrency: Currency = .silverPiece
     @State var rightCurrency: Currency = .goldPiece
+    
+    @FocusState var leftTyping
+    @FocusState var rightTying
     
     var body: some View {
         ZStack {
@@ -44,14 +50,19 @@ struct ContentView: View {
                                 .font(.headline)
                                 .foregroundStyle(.white)
                         }
+                        
                         // text field - $ creates a binding
                         TextField("Amount", text: $leftAmount)
                             .textFieldStyle(.roundedBorder)
+                            .focused($leftTyping)
+                            .keyboardType(.decimalPad)
+                            
                     }
                     .padding(.bottom, -10)
                     .onTapGesture {
                         showCurrencyInfo.toggle()
                     }
+                    .popoverTip(CurrencyTip(), arrowEdge: .top)
                     Image(systemName: "equal")
                         .font(.largeTitle)
                         .foregroundStyle(.white)
@@ -70,6 +81,9 @@ struct ContentView: View {
                         TextField("Amount", text: $rightAmount)
                             .textFieldStyle(.roundedBorder)
                             .multilineTextAlignment(.trailing)
+                            .focused($rightTying)
+                            .keyboardType(.decimalPad)
+                            
                     }
                     .padding(.bottom, -10)
                     .onTapGesture {
@@ -94,18 +108,40 @@ struct ContentView: View {
                             .foregroundStyle(.white)
                     }
                     .padding(.trailing)
-                    .sheet(isPresented: $showExchangeInfo) {
-                        InfoView()
-                    }
-                    .sheet(isPresented: $showCurrencyInfo) {
-                        SelectCurrency(topCurrency: $leftCurrency, bottomCurrency: $rightCurrency)
-                    }
+                    
                 }
                 
                 
-            }
+            } // end of VStack
+            
 //            .border(.blue)
             
+        }
+        .task {
+            try? Tips.configure()
+        }
+        .onChange(of: leftAmount) {
+            if leftTyping {
+                rightAmount = leftCurrency.convert(leftAmount, to: rightCurrency)
+            }
+        }
+        .onChange(of: rightAmount) {
+            if rightTying {
+                leftAmount = rightCurrency.convert(rightAmount, to: leftCurrency)
+            }
+            
+        }
+        .onChange(of: leftCurrency) {
+            rightAmount = leftCurrency.convert(leftAmount, to: rightCurrency)
+        }
+        .onChange(of: rightCurrency) {
+            leftAmount = rightCurrency.convert(rightAmount, to: leftCurrency)
+        }
+        .sheet(isPresented: $showExchangeInfo) {
+            InfoView()
+        }
+        .sheet(isPresented: $showCurrencyInfo) {
+            SelectCurrency(topCurrency: $leftCurrency, bottomCurrency: $rightCurrency)
         }
     }
 }

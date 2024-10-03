@@ -46,4 +46,14 @@ enum Currency: Double, CaseIterable, Identifiable {
             "Gold Piece"
         }
     }
+    
+    func convert(_ amountString: String, to currency: Currency) -> String {
+        // guard is basically saying try and do the first half of the statement and instead of crashing do the else block
+        guard let doubleAmount = Double(amountString) else {
+            return ""
+        }
+        
+        let convertedAmount = (doubleAmount / self.rawValue) * currency.rawValue
+        return String(format: "%.2f", convertedAmount)
+    }
 }
